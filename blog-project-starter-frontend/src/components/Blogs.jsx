@@ -14,7 +14,7 @@ function Blogs() {
        
          auth.onAuthStateChanged((user) => {
       if (user){
-       if(user.uid === "59O2Elf4qcaad9KvArQPKf8G7Ex2"){
+       if(user.uid === "CHQQr3y4r6aoye0KKQSQ72oZv7n2"){
         setAdmin(true)
 console.log("he is admin")
       }else{
