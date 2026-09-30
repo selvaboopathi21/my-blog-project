@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import auth from '../config/firebase';
@@ -21,6 +21,7 @@ function Signup() {
         }
         try {
             await createUserWithEmailAndPassword(auth, email, password);
+            await signOut(auth);
             navigate('/login');
         } catch (firebaseError) {
             setError(firebaseError.message || 'Failed to create account');
