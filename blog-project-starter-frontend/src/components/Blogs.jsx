@@ -5,8 +5,6 @@ import axios from "axios"
 import Footer from './common/Footer';
 import auth from '../config/firebase'
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
 function Blogs() {
 
     const [blogs, setBlogs] = useState([]);
@@ -29,7 +27,7 @@ console.log("he is admin")
          console.log("user logged out");
       }    });
 
-        axios.get(`${API_URL}/api/blogs`).then((res) => {
+        axios.get("/api/blogs").then((res) => {
             console.log(res.data)
             setBlogs(res.data)
         }).catch(() => {
@@ -47,10 +45,10 @@ console.log("he is admin")
 
     const handleLike = async (blog_id) => {
         try {
-            const response = await axios.patch(`${API_URL}/api/blogs/like/${blog_id}`);
+            const response = await axios.patch(`/api/blogs/like/${blog_id}`);
             // After successfully updating the likes count in the backend, fetch the updated list of blogs
             if (response.status === 200) {
-                axios.get(`${API_URL}/api/blogs`).then((res) => {
+                axios.get("/api/blogs").then((res) => {
                     console.log(res.data)
                     setBlogs(res.data)
                 }).catch(() => {
@@ -69,10 +67,10 @@ console.log("he is admin")
 
 
         const likes = 0
-        axios.post(`${API_URL}/api/blogs`, { newTitle, date, newContent, likes }).then((res) => {
+        axios.post("/api/blogs", { newTitle, date, newContent, likes }).then((res) => {
             console.log(res.data)
 
-            axios.get(`${API_URL}/api/blogs`).then((res) => {
+            axios.get("/api/blogs").then((res) => {
                 console.log(res.data)
                 setBlogs(res.data)
             }).catch(() => {

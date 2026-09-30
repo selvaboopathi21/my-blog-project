@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "blog-project-starter-backend": {
+      "root": "blog-project-starter-backend",
+      "framework": "express"
+    },
+    "blog-project-starter-frontend": {
+      "root": "blog-project-starter-frontend",
+      "framework": "create-react-app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "blog-project-starter-backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "blog-project-starter-frontend"
+      }
+    }
+  ]
+}
