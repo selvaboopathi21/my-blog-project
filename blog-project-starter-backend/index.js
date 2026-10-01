@@ -76,6 +76,37 @@ app.post('/api/blogs', async (req, res) => {
   }
 });
 
+app.put('/api/blogs/:id', async (req, res) => {
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { newTitle: req.body.newTitle, newContent: req.body.newContent },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    res.json(updatedBlog);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+app.delete('/api/blogs/:id', async (req, res) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    if (!deletedBlog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    res.json({ message: 'Blog deleted successfully' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Start server
 const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

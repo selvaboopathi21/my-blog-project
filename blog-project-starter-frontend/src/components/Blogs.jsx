@@ -40,6 +40,8 @@ console.log("he is admin")
 
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
+    const [editingBlogId, setEditingBlogId] = useState(null);
+    const [blogError, setBlogError] = useState('');
 
 
     const handleLike = async (blog_id) => {
@@ -59,30 +61,53 @@ console.log("he is admin")
         }
     };
 
-    const handleNewBlogSubmit = (event) => {
-        event.preventDefault(); // Prevent form from refreshing the page
-        const today = new Date();
-        const date = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const handleNewBlogSubmit = async (event) => {
+        event.preventDefault();
+        setBlogError('');
 
+        try {
+            if (editingBlogId) {
+                await axios.put(`/api/blogs/${editingBlogId}`, { newTitle, newContent });
+            } else {
+                const today = new Date();
+                const date = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                await axios.post("/api/blogs", { newTitle, date, newContent, likes: 0 });
+            }
 
-        const likes = 0
-        axios.post("/api/blogs", { newTitle, date, newContent, likes }).then((res) => {
-            console.log(res.data)
+            const response = await axios.get("/api/blogs");
+            setBlogs(response.data);
+            setNewTitle('');
+            setNewContent('');
+            setEditingBlogId(null);
+        } catch (error) {
+            setBlogError('Unable to save the blog post. Please try again.');
+        }
+    };
 
-            axios.get("/api/blogs").then((res) => {
-                console.log(res.data)
-                setBlogs(res.data)
-            }).catch(() => {
-                console.log("Error fetching data")
-            })
+    const handleEditBlog = (blog) => {
+        setEditingBlogId(blog._id);
+        setNewTitle(blog.newTitle);
+        setNewContent(blog.newContent);
+        setBlogError('');
+    };
 
-        });
+    const handleDeleteBlog = async (blogId) => {
+        if (!window.confirm('Are you sure you want to delete this blog post?')) {
+            return;
+        }
 
-
-
-
-        setNewTitle('');
-        setNewContent('');
+        setBlogError('');
+        try {
+            await axios.delete(`/api/blogs/${blogId}`);
+            setBlogs((currentBlogs) => currentBlogs.filter((blog) => blog._id !== blogId));
+            if (editingBlogId === blogId) {
+                setEditingBlogId(null);
+                setNewTitle('');
+                setNewContent('');
+            }
+        } catch (error) {
+            setBlogError('Unable to delete the blog post. Please try again.');
+        }
     };
 
     return (
@@ -92,6 +117,7 @@ console.log("he is admin")
             {/* Blog creation form */}
             {admin? <div className="blog-creation-form mb-8" style={{ width: "80%", margin: "auto" }}>
                 <form onSubmit={handleNewBlogSubmit} className="flex flex-col gap-4">
+                    {blogError && <p className="text-red-500" role="alert">{blogError}</p>}
                     <input
                         type="text"
                         placeholder="Blog Title"
@@ -109,8 +135,13 @@ console.log("he is admin")
                         required
                     />
                     <button type="submit" className="bg-orange-400 text-white p-2 rounded hover:bg-orange-600">
-                        Add Blog
+                        {editingBlogId ? 'Save Changes' : 'Add Blog'}
                     </button>
+                    {editingBlogId && <button type="button" className="border p-2 rounded" onClick={() => {
+                        setEditingBlogId(null);
+                        setNewTitle('');
+                        setNewContent('');
+                    }}>Cancel</button>}
                 </form>
             </div>:""}
            
@@ -123,6 +154,10 @@ console.log("he is admin")
                         <p className="blog-content text-gray-600 mb-4">{blog.newContent}</p>
                         <span className="text-blue-500 cursor-pointer" onClick={() => handleLike(blog._id)}>Like</span>
                         <span className="ml-2">{blog.likes} Likes</span>
+                        {admin && <div className="mt-4 flex gap-3">
+                            <button type="button" className="text-blue-600 hover:underline" onClick={() => handleEditBlog(blog)}>Edit</button>
+                            <button type="button" className="text-red-600 hover:underline" onClick={() => handleDeleteBlog(blog._id)}>Delete</button>
+                        </div>}
                     </div>
                 ))}
             </div>
